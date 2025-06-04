@@ -1,0 +1,67 @@
+{% extends '_layout.njk' %}
+
+  {% block title %}Dependency Dashboard{% endblock %}
+
+{% block content %}
+  <h1>Dependency Dashboard for <strong>{{ repo }}</strong></h1>
+
+  {% if runtime.length == 0 and dev.length == 0 %}
+    <p>No dependencies need updating for {{ repo }}.</p>
+  {% endif %}
+
+{% if runtime.length %}
+ <h2>Runtime dependencies</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Dependency</th>
+      <th>Current Version</th>
+      <th>Latest Version</th>
+      <th>Severity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for dep in runtime %}
+    <tr class="
+        {% if dep.severity == 'high' %}urgent
+        {% elif dep.severity == 'medium' %}warning
+        {% else %}ok
+        {% endif %}">
+      <td>{{ dep.name }}</td>
+      <td>{{ dep.current }}</td>
+      <td>{{ dep.latest }}</td>
+      <td>{{ dep.severity }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No runtime updates</p>
+{% endif %}
+
+<h2>Dev dependencies</h2>
+{% if dev.length %}
+<table>
+  <thead>
+    <tr>
+      <th>Dependency</th>
+      <th>Current Version</th>
+      <th>Latest Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for dep in dev %}
+    <tr>
+      <td>{{ dep.name }}</td>
+      <td>{{ dep.current }}</td>
+      <td>{{ dep.latest }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No dev dependency updates</p>
+{% endif %}
+
+{% endblock %}
+

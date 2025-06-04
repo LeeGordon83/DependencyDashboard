@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Dependency Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="/public/styles/main.css">
+</head>
+<body>
+  <nav class="navbar">
+<ul>
+  {% for repo in repos %}
+    <li><a href="/html-dashboard/{{ repo }}">{{ repo }}</a></li>
+  {% endfor %}
+</ul>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
