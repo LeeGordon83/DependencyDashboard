@@ -2,6 +2,7 @@ const { Octokit } = require('@octokit/rest')
 const ncu = require('npm-check-updates')
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
+const semverDiff = require('semver-diff').default
 
 async function getPackageJson (repoName) {
   const { data } = await octokit.repos.getContent({
@@ -13,15 +14,25 @@ async function getPackageJson (repoName) {
   return JSON.parse(content)
 }
 
-function getSeverity(current, latest) {
+function getSeverity (current, latest) {
   try {
-    const [curMajor] = current.replace(/[^0-9.]/g, '').split('.').map(Number)
-    const [newMajor] = latest.replace(/[^0-9.]/g, '').split('.').map(Number)
+    const cleanCurrent = current.replace(/^[^0-9]*/, '')
+    const cleanLatest = latest.replace(/^[^0-9]*/, '')
 
-    if (newMajor > curMajor) return 'high'     // Major version bump
-    if (current !== latest) return 'medium'    // Minor or patch bump
-    return 'low'
+    const diff = semverDiff(cleanCurrent, cleanLatest)
+
+    switch (diff) {
+      case 'major':
+        return 'high'
+      case 'minor':
+        return 'medium'
+      case 'patch':
+        return 'low'
+      default:
+        return 'unknown'
+    }
   } catch (e) {
+    console.error('Error comparing versions:', e)
     return 'unknown'
   }
 }
@@ -42,7 +53,7 @@ async function getRepoDependencyUpdates (repoName) {
         const current = pkg.dependencies[dep]
         runtime.push({
           name: dep,
-          current: current,
+          current,
           latest,
           severity: getSeverity(current, latest)
         })
@@ -50,18 +61,52 @@ async function getRepoDependencyUpdates (repoName) {
         const current = pkg.devDependencies[dep]
         dev.push({
           name: dep,
-          current: current,
+          current,
           latest,
           severity: getSeverity(current, latest)
         })
       }
     }
-
     return { runtime, dev }
   } catch (err) {
     console.error('Error checking dependency updates:', err)
     throw err
   }
 }
+async function getSummaryStats (repoNames) {
 
-module.exports = { getRepoDependencyUpdates }
+    const results = await Promise.all(
+    repoNames.map(repo => getRepoDependencyUpdates(repo))
+  )
+
+  const stats = {
+    high: 0,
+    medium: 0,
+    low: 0,
+    unknown: 0,
+    totalChecked: 0,
+    totalOutdated: 0
+  }
+
+
+  for (const repo of results) {
+    const allDeps = [...repo.runtime, ...repo.dev]
+    stats.totalChecked += allDeps.length
+
+    for (const dep of allDeps) {
+      const severity = dep.severity || 'unknown'
+      if (!stats[severity]) {
+        stats[severity] = 0
+      }
+
+      stats[severity] += 1
+      stats.totalOutdated += 1
+    }
+  }
+
+  return stats
+
+
+}
+
+module.exports = { getRepoDependencyUpdates, getSummaryStats }

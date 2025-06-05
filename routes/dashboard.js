@@ -1,4 +1,5 @@
-const { getRepoDependencyUpdates } = require('../deps')
+const { getRepoDependencyUpdates } = require('../lib/dependencyUpdates')
+const { getNodeVersionStats } = require('../lib/summaryStats')
 
 exports.plugin = {
   name: 'dashboardRoutes',
@@ -22,13 +23,20 @@ exports.plugin = {
         path: '/html-dashboard/{repo?}',
         handler: async (request, h) => {
           try {
+            const repos = process.env.GITHUB_REPOS
+              ? process.env.GITHUB_REPOS.split(',').map(r => r.trim())
+              : []
+
             const repoName = request.params.repo || process.env.GITHUB_REPO
             const data = await getRepoDependencyUpdates(repoName)
+            const nodeResults = await getNodeVersionStats(repos)
+
             return h.view('dashboard.njk', {
               repo: repoName,
               runtime: data.runtime || [],
               dev: data.dev || [],
-              repos: ['flood-app', 'flood-service', 'flood-data', 'fws-app', 'flood-gis', 'flood-webchat', 'defra-map'] 
+              repos,
+              nodeResults
             })
           } catch (err) {
             console.error('Error loading dashboard view:', err)

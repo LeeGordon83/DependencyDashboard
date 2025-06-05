@@ -9,6 +9,37 @@
     <p>No dependencies need updating for {{ repo }}.</p>
   {% endif %}
 
+<h2 class="text-xl font-bold mt-4 mb-2">Node.js Version Overview</h2>
+
+<table class="table-auto border-collapse border w-full mb-6">
+  <thead>
+    <tr>
+      <th class="border px-4 py-2">Repo</th>
+      <th class="border px-4 py-2">Current Version</th>
+      <th class="border px-4 py-2">Latest LTS</th>
+      <th class="border px-4 py-2">Severity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in nodeResults %}
+    {% if item.repo == repo %}
+    <tr class="
+    {% if item.node.severity == 'high' %}urgent
+    {% elif item.node.severity == 'medium' %}warning
+    {% endif %}">
+      <td class="border px-4 py-2 font-mono">{{ item.repo }}</td>
+      <td class="border px-4 py-2 font-mono">{{ item.node.version }}</td>
+      <td class="border px-4 py-2 font-mono">{{ item.node.latestLts }}</td>
+      <td class="border px-4 py-2">
+        <span class="severity severity-{{ item.node.severity }}">{{ item.node.severity }}</span>
+      </td>
+    </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+
 {% if runtime.length %}
  <h2>Runtime dependencies</h2>
 <table>
