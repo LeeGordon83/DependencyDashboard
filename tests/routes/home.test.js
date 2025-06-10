@@ -1,5 +1,5 @@
 const Hapi = require('@hapi/hapi')
-const homeRoute = require('./../../routes/home')
+const homeRoute = require('../../routes/home')
 const { getSummaryStats, getNodeVersionStats } = require('../../lib/summaryStats')
 
 describe('GET / route', () => {
