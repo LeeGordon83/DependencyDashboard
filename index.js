@@ -1,10 +1,12 @@
 require('dotenv').config()
-require('events').EventEmitter.defaultMaxListeners = 20
+require('events').EventEmitter.defaultMaxListeners = 20 
+
 const Hapi = require('@hapi/hapi')
 const Vision = require('@hapi/vision')
 const Inert = require('@hapi/inert')
 const Path = require('path')
 const Nunjucks = require('nunjucks')
+
 const DashboardRoutes = require('./routes/dashboard')
 const HomeRoutes = require('./routes/home')
 

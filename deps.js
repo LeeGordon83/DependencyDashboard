@@ -74,8 +74,7 @@ async function getRepoDependencyUpdates (repoName) {
   }
 }
 async function getSummaryStats (repoNames) {
-
-    const results = await Promise.all(
+  const results = await Promise.all(
     repoNames.map(repo => getRepoDependencyUpdates(repo))
   )
 
@@ -87,7 +86,6 @@ async function getSummaryStats (repoNames) {
     totalChecked: 0,
     totalOutdated: 0
   }
-
 
   for (const repo of results) {
     const allDeps = [...repo.runtime, ...repo.dev]
@@ -105,8 +103,6 @@ async function getSummaryStats (repoNames) {
   }
 
   return stats
-
-
 }
 
 module.exports = { getRepoDependencyUpdates, getSummaryStats }
