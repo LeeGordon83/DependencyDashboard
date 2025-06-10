@@ -1,6 +1,6 @@
-# DependencyDashboard
+# Dependency Dashboard
 
-A Node.js web dashboard for summarizing and visualizing dependency and Node.js version statistics across multiple GitHub repositories.
+A Node.js web dashboard for summarising and visualising dependency and Node.js version statistics across multiple GitHub repositories.
 
 ## Features
 
@@ -35,7 +35,7 @@ PORT=3000
 HOST=localhost
 ```
 
-- `GITHUB_REPOS`: Comma-separated list of GitHub repositories to analyze (e.g., `org/repo1,org/repo2`).
+- `GITHUB_REPOS`: Comma-separated list of GitHub repositories to analyse (e.g., `org/repo1,org/repo2`).
 - `PORT` and `HOST`: (Optional) Server configuration.
 
 ### Running the Server
