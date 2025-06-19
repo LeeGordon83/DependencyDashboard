@@ -1,23 +1,10 @@
-const { getRepoDependencyUpdates } = require('../lib/dependencyUpdates')
-const { getNodeVersionStats } = require('../lib/summaryStats')
+import { getRepoDependencyUpdates } from '../lib/dependencyUpdates.js'
+import { getNodeVersionStats } from '../lib/summaryStats.js'
 
-exports.plugin = {
+export default {
   name: 'dashboardRoutes',
   register: async function (server) {
     server.route([
-      {
-        method: 'GET',
-        path: '/dashboard',
-        handler: async (request, h) => {
-          try {
-            const data = await getRepoDependencyUpdates()
-            return data
-          } catch (err) {
-            console.error('Error loading dashboard JSON:', err)
-            return h.response('Internal Server Error').code(500)
-          }
-        }
-      },
       {
         method: 'GET',
         path: '/html-dashboard/{repo?}',
@@ -27,12 +14,17 @@ exports.plugin = {
               ? process.env.GITHUB_REPOS.split(',').map(r => r.trim())
               : []
 
-            const repoName = request.params.repo || process.env.GITHUB_REPO
-            const data = await getRepoDependencyUpdates(repoName)
+            const repoName = request.params.repo
+
+            let data = { runtime: [], dev: [] }
+            if (repoName) {
+              data = await getRepoDependencyUpdates(repoName)
+            }
+
             const nodeResults = await getNodeVersionStats(repos)
 
             return h.view('dashboard.njk', {
-              repo: repoName,
+              repo: repoName || 'All Repos',
               runtime: data.runtime || [],
               dev: data.dev || [],
               repos,

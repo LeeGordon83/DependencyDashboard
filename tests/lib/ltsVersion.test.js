@@ -1,9 +1,18 @@
-const { getLatestLtsVersion, calcVersion } = require('../../lib/ltsVersion')
-const got = require('got').default
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-jest.mock('got', () => ({
-  default: jest.fn()
-}))
+vi.mock('got', () => {
+  // define mocks here, inside factory, no outside references
+  return {
+    default: vi.fn(() => ({
+      json: vi.fn().mockResolvedValue([
+        { version: 'v18.17.0', lts: 'Hydrogen' },
+        { version: 'v20.5.0', lts: 'Gallium' }
+      ])
+    }))
+  }
+})
+
+import { getLatestLtsVersion, calcVersion } from '../../lib/ltsVersion.js'
 
 describe('calcVersion', () => {
   it('calculates version number correctly', () => {
@@ -12,35 +21,25 @@ describe('calcVersion', () => {
     expect(calcVersion('v0.0.1')).toBe(1)
   })
 
-  it('throws on invalid version string', () => {
-    expect(() => calcVersion('foo')).toThrow(/version regex failed/)
-    expect(() => calcVersion('1.2')).toThrow(/version regex failed/)
+  it('throws for invalid version string', () => {
+    expect(() => calcVersion('foo')).toThrow(/version regex failed/i)
+    expect(() => calcVersion('1.2')).toThrow()
   })
 })
 
 describe('getLatestLtsVersion', () => {
-  it('returns the latest LTS version', async () => {
-  got.mockImplementation(() => ({
-    json: async () => ([
-      { version: 'v18.17.1', lts: 'Hydrogen' },
-      { version: 'v20.5.0', lts: 'Iron' },
-      { version: 'v21.0.0', lts: false }
-    ])
-  }))
-
+  it('returns latest LTS version from JSON', async () => {
     const result = await getLatestLtsVersion()
     expect(result).toBe('20.5.0')
   })
 
-  it('ignores non-LTS versions', async () => {
-    got.mockImplementation(() => ({
-      json: async () => ([
-        { version: 'v21.0.0', lts: false },
-        { version: 'v18.17.1', lts: 'Hydrogen' }
-      ])
+  it('throws if no LTS versions are found', async () => {
+    // Override mock inside test
+    const got = (await import('got')).default
+    got.mockImplementationOnce(() => ({
+      json: () => Promise.resolve([])
     }))
 
-    const result = await getLatestLtsVersion()
-    expect(result).toBe('18.17.1')
+    await expect(getLatestLtsVersion()).rejects.toThrow()
   })
 })

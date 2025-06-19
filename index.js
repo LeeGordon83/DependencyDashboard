@@ -1,14 +1,18 @@
-require('dotenv').config()
-require('events').EventEmitter.defaultMaxListeners = 20 
+import dotenv from 'dotenv'
+import { EventEmitter } from 'events'
 
-const Hapi = require('@hapi/hapi')
-const Vision = require('@hapi/vision')
-const Inert = require('@hapi/inert')
-const Path = require('path')
-const Nunjucks = require('nunjucks')
+import Hapi from '@hapi/hapi'
+import Vision from '@hapi/vision'
+import Inert from '@hapi/inert'
+import Path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
+import Nunjucks from 'nunjucks'
 
-const DashboardRoutes = require('./routes/dashboard')
-const HomeRoutes = require('./routes/home')
+import DashboardRoutes from './routes/dashboard.js'
+import HomeRoutes from './routes/home.js'
+const __dirname = dirname(fileURLToPath(import.meta.url))
+dotenv.config()
+EventEmitter.defaultMaxListeners = 20
 
 const init = async () => {
   const server = Hapi.server({

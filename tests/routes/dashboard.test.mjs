@@ -1,44 +1,47 @@
-const Hapi = require('@hapi/hapi')
-const homeRoute = require('../../routes/home')
-const { getSummaryStats, getNodeVersionStats } = require('../../lib/summaryStats')
+import Hapi from '@hapi/hapi'
+import homeRoute from '../../routes/home.js'
+
+// Mock the summaryStats module before importing its exports
+vi.mock('../../lib/summaryStats.js', () => ({
+  getSummaryStats: vi.fn(),
+  getNodeVersionStats: vi.fn()
+}))
+
+import { getSummaryStats, getNodeVersionStats } from '../../lib/summaryStats.js'
 
 describe('GET / route', () => {
   let server
 
-beforeEach(async () => {
-  server = Hapi.server()
-  await server.register(homeRoute)
-  server.decorate('toolkit', 'view', function (template, context) {
-    return { template, context }
-  })
-  getSummaryStats.mockReset()
-  getNodeVersionStats.mockReset()
-})
-
-it('should return a 200 response and render view', async () => {
-  getSummaryStats.mockResolvedValue({ foo: 1 })
-  getNodeVersionStats.mockResolvedValue({ bar: 2 })
-
-  const response = await server.inject({
-    method: 'GET',
-    url: '/'
+  beforeEach(async () => {
+    server = Hapi.server()
+    await server.register(homeRoute)
+    server.decorate('toolkit', 'view', function (template, context) {
+      return { template, context }
+    })
+    getSummaryStats.mockReset()
+    getNodeVersionStats.mockReset()
   })
 
-  expect(response.statusCode).toBe(200)
-  expect(response.result).toEqual({
-    template: 'home.njk',
-    context: {
-      repos: [],
-      stats: { foo: 1 },
-      nodeResults: { bar: 2 }
-    }
+  it('should return a 200 response and render view', async () => {
+    getSummaryStats.mockResolvedValue({ foo: 1 })
+    getNodeVersionStats.mockResolvedValue({ bar: 2 })
+
+    const response = await server.inject({
+      method: 'GET',
+      url: '/'
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.result).toEqual({
+      template: 'home.njk',
+      context: {
+        repos: [],
+        stats: { foo: 1 },
+        nodeResults: { bar: 2 }
+      }
+    })
   })
 })
-})
-jest.mock('../../lib/summaryStats', () => ({
-  getSummaryStats: jest.fn(),
-  getNodeVersionStats: jest.fn()
-}))
 
 describe('home.js route plugin', () => {
   let server
@@ -55,7 +58,6 @@ describe('home.js route plugin', () => {
   beforeEach(async () => {
     server = Hapi.server()
     await server.register(homeRoute)
-    // Stub h.view to just return its arguments for inspection
     server.decorate('toolkit', 'view', function (template, context) {
       return { template, context }
     })
@@ -83,9 +85,9 @@ describe('home.js route plugin', () => {
   })
 
   it('handles missing GITHUB_REPOS env as empty array', async () => {
-    delete process.env.GITHUB_REPOS
     getSummaryStats.mockResolvedValue({ a: 1 })
     getNodeVersionStats.mockResolvedValue({ b: 2 })
+    delete process.env.GITHUB_REPOS
 
     const res = await server.inject({ method: 'GET', url: '/' })
 

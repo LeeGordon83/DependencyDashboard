@@ -1,6 +1,6 @@
-const { getSummaryStats, getNodeVersionStats } = require('../lib/summaryStats')
+import { getSummaryStats, getNodeVersionStats } from '../lib/summaryStats.js'
 
-module.exports = {
+export default {
   plugin: {
     name: 'home-routes',
     register: async function (server, options) {
@@ -12,8 +12,8 @@ module.exports = {
             ? process.env.GITHUB_REPOS.split(',').map(r => r.trim())
             : []
 
-          const stats = await getSummaryStats(repos)
           const nodeResults = await getNodeVersionStats(repos)
+          const stats = await getSummaryStats(repos)
 
           return h.view('home.njk', { repos, stats, nodeResults })
         }
