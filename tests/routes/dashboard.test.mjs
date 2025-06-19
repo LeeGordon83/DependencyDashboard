@@ -1,105 +1,102 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import Hapi from '@hapi/hapi'
-import homeRoute from '../../routes/home.js'
+import dashboardRoutes from '../../routes/dashboard.js'
 
-// Mock the summaryStats module before importing its exports
+vi.mock('../../lib/dependencyUpdates.js', () => ({
+  getRepoDependencyUpdates: vi.fn()
+}))
+
 vi.mock('../../lib/summaryStats.js', () => ({
-  getSummaryStats: vi.fn(),
   getNodeVersionStats: vi.fn()
 }))
 
-import { getSummaryStats, getNodeVersionStats } from '../../lib/summaryStats.js'
+vi.mock('../../lib/sortDeps.js', () => ({
+  sortDeps: vi.fn((deps) => deps) // stubbed passthrough
+}))
 
-describe('GET / route', () => {
+import { getRepoDependencyUpdates } from '../../lib/dependencyUpdates.js'
+import { getNodeVersionStats } from '../../lib/summaryStats.js'
+
+describe('GET /html-dashboard/{repo?}', () => {
   let server
 
   beforeEach(async () => {
     server = Hapi.server()
-    await server.register(homeRoute)
+    await server.register(dashboardRoutes)
+
+    // Stub h.view to inspect what it was called with
     server.decorate('toolkit', 'view', function (template, context) {
       return { template, context }
     })
-    getSummaryStats.mockReset()
+
+    getRepoDependencyUpdates.mockReset()
     getNodeVersionStats.mockReset()
   })
 
-  it('should return a 200 response and render view', async () => {
-    getSummaryStats.mockResolvedValue({ foo: 1 })
-    getNodeVersionStats.mockResolvedValue({ bar: 2 })
+  it('renders dashboard for a specific repo', async () => {
+    process.env.GITHUB_REPOS = 'repo1,repo2'
+    getRepoDependencyUpdates.mockResolvedValue({
+      runtime: [{ name: 'express', current: '4.0.0', latest: '5.0.0', severity: 'high' }],
+      dev: [{ name: 'jest', current: '^26.0.0', latest: '^29.0.0', severity: 'medium' }]
+    })
 
-    const response = await server.inject({
+    getNodeVersionStats.mockResolvedValue([
+      { repo: 'repo1', node: { version: '16.0.0', latestLts: '18.17.0', severity: 'medium' } }
+    ])
+
+    const res = await server.inject({
       method: 'GET',
-      url: '/'
+      url: '/html-dashboard/repo1?sort=name&dir=asc'
     })
 
-    expect(response.statusCode).toBe(200)
-    expect(response.result).toEqual({
-      template: 'home.njk',
-      context: {
-        repos: [],
-        stats: { foo: 1 },
-        nodeResults: { bar: 2 }
-      }
-    })
-  })
-})
-
-describe('home.js route plugin', () => {
-  let server
-  let originalEnv
-
-  beforeAll(() => {
-    originalEnv = process.env.GITHUB_REPOS
-  })
-
-  afterAll(() => {
-    process.env.GITHUB_REPOS = originalEnv
-  })
-
-  beforeEach(async () => {
-    server = Hapi.server()
-    await server.register(homeRoute)
-    server.decorate('toolkit', 'view', function (template, context) {
-      return { template, context }
-    })
-    getSummaryStats.mockReset()
-    getNodeVersionStats.mockReset()
-  })
-
-  it('calls summary functions with repos from env and renders view', async () => {
-    process.env.GITHUB_REPOS = 'repo1, repo2'
-    getSummaryStats.mockResolvedValue({ foo: 1 })
-    getNodeVersionStats.mockResolvedValue({ bar: 2 })
-
-    const res = await server.inject({ method: 'GET', url: '/' })
-
-    expect(getSummaryStats).toHaveBeenCalledWith(['repo1', 'repo2'])
-    expect(getNodeVersionStats).toHaveBeenCalledWith(['repo1', 'repo2'])
+    expect(res.statusCode).toBe(200)
     expect(res.result).toEqual({
-      template: 'home.njk',
+      template: 'dashboard.njk',
       context: {
+        repo: 'repo1',
+        runtime: expect.any(Array),
+        dev: expect.any(Array),
         repos: ['repo1', 'repo2'],
-        stats: { foo: 1 },
-        nodeResults: { bar: 2 }
+        nodeResults: expect.any(Array),
+        sort: 'name'
       }
     })
   })
 
-  it('handles missing GITHUB_REPOS env as empty array', async () => {
-    getSummaryStats.mockResolvedValue({ a: 1 })
-    getNodeVersionStats.mockResolvedValue({ b: 2 })
-    delete process.env.GITHUB_REPOS
+  it('renders dashboard for all repos when no repo param is given', async () => {
+    process.env.GITHUB_REPOS = 'repo1,repo2'
+    getRepoDependencyUpdates.mockResolvedValue({ runtime: [], dev: [] })
+    getNodeVersionStats.mockResolvedValue([])
 
-    const res = await server.inject({ method: 'GET', url: '/' })
+    const res = await server.inject({
+      method: 'GET',
+      url: '/html-dashboard'
+    })
 
-    expect(getSummaryStats).toHaveBeenCalledWith([])
-    expect(getNodeVersionStats).toHaveBeenCalledWith([])
+    expect(res.statusCode).toBe(200)
     expect(res.result).toEqual({
-      template: 'home.njk',
+      template: 'dashboard.njk',
       context: {
-        repos: [],
-        stats: { a: 1 },
-        nodeResults: { b: 2 }
+        repo: 'All Repos',
+        runtime: [],
+        dev: [],
+        repos: ['repo1', 'repo2'],
+        nodeResults: [],
+        sort: 'name'
       }
     })
+  })
+
+  it('returns 500 and logs on error', async () => {
+    process.env.GITHUB_REPOS = 'repo1'
+    getRepoDependencyUpdates.mockRejectedValue(new Error('Something went wrong'))
+
+    const res = await server.inject({
+      method: 'GET',
+      url: '/html-dashboard/repo1'
+    })
+
+    expect(res.statusCode).toBe(500)
+    expect(res.payload).toContain('Internal Server Error')
   })
 })

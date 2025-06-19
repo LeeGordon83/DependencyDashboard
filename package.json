@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "test": "vitest",
+    "test": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:lint": "eslint",
     "start:dev": "nodemon index.js"
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.27.4",
     "@babel/preset-env": "^7.27.2",
+    "@vitest/coverage-v8": "^3.2.3",
     "vitest": "^3.2.3"
   },
   "standard": {
@@ -45,7 +46,8 @@
       "$",
       "XMLHttpRequest",
       "dataLayer",
-      "it"
+      "it",
+      "vi"
     ]
   }
 }

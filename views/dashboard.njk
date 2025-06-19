@@ -42,13 +42,32 @@
 
 {% if runtime.length %}
  <h2>Runtime dependencies</h2>
+ <p style="font-size:0.95em;color:#666;">Tip: Click the <b>Dependency</b> or <b>Severity</b> column headers to sort.</p>
 <table>
   <thead>
     <tr>
-      <th>Dependency</th>
+      <th>
+        <a href="?sort=name&dir={% if sort == 'name' and dir == 'asc' %}desc{% else %}asc{% endif %}" title="Sort by Dependency">
+          Dependency
+          {% if sort == 'name' %}
+            {% if dir == 'asc' %}▲{% else %}▼{% endif %}
+          {% else %}
+            <span style="font-size:0.9em;opacity:0.6;">⬍</span>
+          {% endif %}
+        </a>
+      </th>
       <th>Current Version</th>
       <th>Latest Version</th>
-      <th>Severity</th>
+      <th>
+        <a href="?sort=severity&dir={% if sort == 'severity' and dir == 'asc' %}desc{% else %}asc{% endif %}" title="Sort by Severity">
+          Severity
+          {% if sort == 'severity' %}
+            {% if dir == 'asc' %}▲{% else %}▼{% endif %}
+          {% else %}
+            <span style="font-size:0.9em;opacity:0.6;">⬍</span>
+          {% endif %}
+        </a>
+      </th> 
     </tr>
   </thead>
   <tbody>

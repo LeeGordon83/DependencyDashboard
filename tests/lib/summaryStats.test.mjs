@@ -1,4 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+// Import after mocks
+import { getRepoDependencyUpdates } from '../../lib/dependencyUpdates'
+import { getNodeVersion } from '../../lib/github' // 👈 fix
+import { getSeverity } from '../../lib/severity'
+import { getLatestLtsVersion } from '../../lib/ltsVersion'
+import { getSummaryStats, getNodeVersionStats } from '../../lib/summaryStats'
 
 // Mock modules with actual function names used
 vi.mock('../../lib/dependencyUpdates', () => ({
@@ -16,13 +21,6 @@ vi.mock('../../lib/severity', () => ({
 vi.mock('../../lib/ltsVersion', () => ({
   getLatestLtsVersion: vi.fn()
 }))
-
-// Import after mocks
-import { getRepoDependencyUpdates } from '../../lib/dependencyUpdates'
-import { getNodeVersion } from '../../lib/github' // 👈 fix
-import { getSeverity } from '../../lib/severity'
-import { getLatestLtsVersion } from '../../lib/ltsVersion'
-import { getSummaryStats, getNodeVersionStats } from '../../lib/summaryStats'
 
 describe('getSummaryStats', () => {
   beforeEach(() => {

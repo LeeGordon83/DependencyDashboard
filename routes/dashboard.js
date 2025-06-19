@@ -1,5 +1,6 @@
 import { getRepoDependencyUpdates } from '../lib/dependencyUpdates.js'
 import { getNodeVersionStats } from '../lib/summaryStats.js'
+import { sortDeps } from '../lib/sortDeps.js'
 
 export default {
   name: 'dashboardRoutes',
@@ -15,20 +16,27 @@ export default {
               : []
 
             const repoName = request.params.repo
+            const sort = request.query.sort || 'name'
+            const dir = request.query.dir === 'desc' ? 'desc' : 'asc'
 
             let data = { runtime: [], dev: [] }
             if (repoName) {
               data = await getRepoDependencyUpdates(repoName)
             }
 
+
+            const runtime = sortDeps(data.runtime, sort, dir)
+            const dev = sortDeps(data.dev, sort, dir)
+
             const nodeResults = await getNodeVersionStats(repos)
 
             return h.view('dashboard.njk', {
               repo: repoName || 'All Repos',
-              runtime: data.runtime || [],
-              dev: data.dev || [],
+              runtime,
+              dev,
               repos,
-              nodeResults
+              nodeResults,
+              sort
             })
           } catch (err) {
             console.error('Error loading dashboard view:', err)

@@ -1,5 +1,3 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-
 vi.mock('npm-check-updates', () => ({
   default: {
     run: vi.fn()

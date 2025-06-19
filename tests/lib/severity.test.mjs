@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest'
 import { getSeverity } from '../../lib/severity.js'
 
 describe('getSeverity', () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { getLatestLtsVersion, calcVersion } from '../../lib/ltsVersion.js'
 
 vi.mock('got', () => {
   // define mocks here, inside factory, no outside references
@@ -11,8 +11,6 @@ vi.mock('got', () => {
     }))
   }
 })
-
-import { getLatestLtsVersion, calcVersion } from '../../lib/ltsVersion.js'
 
 describe('calcVersion', () => {
   it('calculates version number correctly', () => {
