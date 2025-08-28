@@ -70,7 +70,7 @@ HOST=localhost
 - `GITHUB_REPOS`: Comma-separated list of GitHub repositories to analyse (e.g., `org/repo1,org/repo2`).
 - `PORT` and `HOST`: (Optional) Server configuration.
 
-## GitHub Personal Access Token
+### GitHub Personal Access Token
 
 This app requires a GitHub Personal Access Token (PAT) to access repository data.  
 You must create a token and add it to your `.env` file as `GITHUB_TOKEN`.
