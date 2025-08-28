@@ -24,6 +24,38 @@ git clone https://github.com/yourusername/DependencyDashboard.git
 cd DependencyDashboard
 npm install
 ```
+### Running with Docker
+
+You can run the dashboard in a Docker container:
+
+```sh
+docker build -t dependency-dashboard .
+docker run --env-file .env -p 3000:3000 dependency-dashboard
+```
+
+- Make sure you have a `.env` file in your project root with the required environment variables (see below).
+- The dashboard will be available at [http://localhost:3000](http://localhost:3000).
+
+#### Using Docker Compose
+
+Alternatively, you can use Docker Compose:
+
+```yaml
+version: '3'
+services:
+  dashboard:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+```
+
+Then run:
+
+```sh
+docker-compose up --build
+```
 
 ### Configuration
 
