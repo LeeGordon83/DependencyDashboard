@@ -70,6 +70,24 @@ HOST=localhost
 - `GITHUB_REPOS`: Comma-separated list of GitHub repositories to analyse (e.g., `org/repo1,org/repo2`).
 - `PORT` and `HOST`: (Optional) Server configuration.
 
+## GitHub Personal Access Token
+
+This app requires a GitHub Personal Access Token (PAT) to access repository data.  
+You must create a token and add it to your `.env` file as `GITHUB_TOKEN`.
+
+### How to create a GitHub PAT
+
+1. Go to [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens).
+2. Click **"Generate new token"**.
+3. Select the scopes you need (at minimum, `repo` for public/private repo access).
+4. Copy the token and add it to your `.env` file:
+
+   ```
+   GITHUB_TOKEN=your_token_here
+   ```
+
+**Never share your token publicly.**
+
 ### Running the Server
 
 ```sh
