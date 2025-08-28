@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import Hapi from '@hapi/hapi'
 import dashboardRoutes from '../../routes/dashboard.js'
 
+import { getRepoDependencyUpdates } from '../../lib/dependencyUpdates.js'
+import { getNodeVersionStats } from '../../lib/summaryStats.js'
+
 vi.mock('../../lib/dependencyUpdates.js', () => ({
   getRepoDependencyUpdates: vi.fn()
 }))
@@ -13,9 +16,6 @@ vi.mock('../../lib/summaryStats.js', () => ({
 vi.mock('../../lib/sortDeps.js', () => ({
   sortDeps: vi.fn((deps) => deps) // stubbed passthrough
 }))
-
-import { getRepoDependencyUpdates } from '../../lib/dependencyUpdates.js'
-import { getNodeVersionStats } from '../../lib/summaryStats.js'
 
 describe('GET /html-dashboard/{repo?}', () => {
   let server

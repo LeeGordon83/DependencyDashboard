@@ -24,7 +24,6 @@ export default {
               data = await getRepoDependencyUpdates(repoName)
             }
 
-
             const runtime = sortDeps(data.runtime, sort, dir)
             const dev = sortDeps(data.dev, sort, dir)
 

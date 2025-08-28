@@ -1,11 +1,17 @@
-// vitest.config.js
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['tests/**/*.test.js', 'tests/**/*.test.mjs']
+    include: ['**/*.test.js', '**/*.test.mjs']
   },
-  root: '.',
+  coverage: {
+    provider: 'v8', // or 'c8'
+    exclude: [
+      '**/index.js',
+      'DependencyDashboard/index.js'
+    ]
+  },
+  root: '.'
 })
