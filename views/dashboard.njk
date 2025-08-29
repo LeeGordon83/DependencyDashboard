@@ -39,6 +39,38 @@
   </tbody>
 </table>
 
+<h2 class="text-xl font-bold mt-4 mb-2">Security Overview</h2>
+
+{% if security %}
+  <table class="table-auto border-collapse border w-full mb-6">
+    <thead>
+      <tr>
+        <th class="border px-4 py-2">Metric</th>
+        <th class="border px-4 py-2">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="border px-4 py-2">Outdated Dependencies</td>
+        <td class="border px-4 py-2">{{ security.outdated }}</td>
+      </tr>
+      <tr>
+        <td class="border px-4 py-2">High Severity Issues</td>
+        <td class="border px-4 py-2"><span class="severity severity-high">{{ security.highSeverity }}</span></td>
+      </tr>
+      <tr>
+        <td class="border px-4 py-2">Medium Severity Issues</td>
+        <td class="border px-4 py-2"><span class="severity severity-medium">{{ security.mediumSeverity }}</span></td>
+      </tr>
+      <tr>
+        <td class="border px-4 py-2">Last Updated</td>
+        <td class="border px-4 py-2">{{ security.lastUpdated }}</td>
+      </tr>
+    </tbody>
+  </table>
+{% else %}
+  <p>No security metrics available yet.</p>
+{% endif %}
 
 {% if runtime.length %}
  <h2>Runtime dependencies</h2>

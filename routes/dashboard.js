@@ -19,7 +19,7 @@ export default {
             const sort = request.query.sort || 'name'
             const dir = request.query.dir === 'desc' ? 'desc' : 'asc'
 
-            let data = { runtime: [], dev: [] }
+            let data = { runtime: [], dev: [], security: { outdated: 0, highSeverity: 0, mediumSeverity: 0, lastUpdated: null } }
             if (repoName) {
               data = await getRepoDependencyUpdates(repoName)
             }
@@ -35,7 +35,9 @@ export default {
               dev,
               repos,
               nodeResults,
-              sort
+              sort,
+              dir,
+              security: data.security
             })
           } catch (err) {
             console.error('Error loading dashboard view:', err)
